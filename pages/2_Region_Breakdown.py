@@ -1,11 +1,9 @@
-import glob
-import os
-
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+from drive_loader import get_latest_csv
 from xrp_styles import PAGE_CSS, section_header, divider_line
 
 # ── Colours ───────────────────────────────────────────────────────────────────
@@ -75,8 +73,9 @@ SEG_COLOURS = {
 
 # ── Data loading ──────────────────────────────────────────────────────────────
 @st.cache_data(show_spinner="Loading panel data…")
-def load_data(path) -> pd.DataFrame:
-    df = pd.read_csv(path, low_memory=False)
+def load_data(filename, data_bytes) -> pd.DataFrame:
+    import io
+    df = pd.read_csv(io.BytesIO(data_bytes), low_memory=False)
     df["_segment"]  = df.get("SR Customer Type", "").replace("", "Unknown").fillna("Unknown")
     df["_employees"] = df.get("SR # of Employees", pd.NA).apply(safe_int)
     df["_partners"]  = df.get("SR # of partners",  pd.NA).apply(safe_int)
@@ -92,28 +91,29 @@ def load_data(path) -> pd.DataFrame:
 
 
 # ── Load CSV ──────────────────────────────────────────────────────────────────
+df_raw = None
+file_ref, filename = get_latest_csv()
+if file_ref is not None:
+    if hasattr(file_ref, "read"):
+        _bytes = file_ref.read()
+    else:
+        with open(file_ref, "rb") as _f:
+            _bytes = _f.read()
+    df_raw = load_data(filename, _bytes)
+
+if df_raw is None:
+    st.error(
+        "No data found. Check that:\n"
+        "- GITHUB_TOKEN and GITHUB_REPO are set in Streamlit secrets\n"
+        "- The repo contains a file starting with `xero_people_`\n"
+        "- The token has Contents: Read-only permission on that repo"
+    )
+    st.stop()
+
 with st.sidebar:
     st.markdown("## Region Breakdown")
     st.markdown("---")
-    uploaded = st.file_uploader("Upload Rally CSV export", type=["csv"],
-                                label_visibility="collapsed")
-    df_raw = None
-    if uploaded:
-        df_raw = load_data(uploaded)
-    else:
-        hits = (
-            glob.glob(os.path.expanduser("~/Downloads/xero_people_*.csv")) +
-            glob.glob(os.path.expanduser("~/Desktop/xero_people_*.csv"))
-        )
-        if hits:
-            latest = max(hits, key=os.path.getmtime)
-            df_raw = load_data(latest)
-            st.caption(f"Auto-loaded: `{os.path.basename(latest)}`")
-
-    if df_raw is None:
-        st.info("Upload a Rally CSV export to get started.")
-        st.stop()
-
+    st.caption(f"Data: `{filename}`")
     st.markdown("### Filters")
     show_unclassified = st.checkbox("Include 'Not classified'", value=False)
 

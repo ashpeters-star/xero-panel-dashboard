@@ -1,10 +1,10 @@
-import glob
-import os
 from datetime import date
 
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+
+from drive_loader import get_latest_csv
 
 # ── Palette (matched to slide) ────────────────────────────────────────────────
 PAGE_BG      = "#1B2438"
@@ -47,8 +47,10 @@ def safe_int(val):
 
 # ── Data ──────────────────────────────────────────────────────────────────────
 @st.cache_data(show_spinner="Loading…")
-def load_data(path) -> pd.DataFrame:
-    df = pd.read_csv(path, low_memory=False)
+def load_data(filename, data_bytes) -> pd.DataFrame:
+    import io
+    buf = io.BytesIO(data_bytes) if isinstance(data_bytes, bytes) else data_bytes
+    df = pd.read_csv(buf, low_memory=False)
     df["_ctype"]  = df.get("SR Customer Type", "").replace("", "Unknown").fillna("Unknown")
     df["_region"] = df.get("SR User Country", "").replace("", pd.NA).map(COUNTRY_MAP)
     df["_ab"]     = df["_ctype"].isin(AB_TYPES)
@@ -57,16 +59,18 @@ def load_data(path) -> pd.DataFrame:
     return df
 
 
-hits = (
-    glob.glob(os.path.expanduser("~/Downloads/xero_people_*.csv")) +
-    glob.glob(os.path.expanduser("~/Desktop/xero_people_*.csv"))
-)
-if not hits:
-    st.error("No Rally CSV found in ~/Downloads or ~/Desktop.")
+_file_ref, _filename = get_latest_csv()
+if _file_ref is None:
+    st.error("No data found. Add GITHUB_TOKEN and GITHUB_REPO to Streamlit secrets.")
     st.stop()
 
-latest      = max(hits, key=os.path.getmtime)
-df          = load_data(latest)
+if hasattr(_file_ref, "read"):
+    _data_bytes = _file_ref.read()
+else:
+    with open(_file_ref, "rb") as _f:
+        _data_bytes = _f.read()
+
+df = load_data(_filename, _data_bytes)
 df_r        = df[df["_region"].isin(REGIONS)]
 total_panel = len(df)
 total_ab    = int(df["_ab"].sum())

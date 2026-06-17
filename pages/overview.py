@@ -1,5 +1,3 @@
-import glob
-import os
 import re
 from datetime import date, timedelta
 from typing import Optional
@@ -9,6 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+from drive_loader import get_latest_csv
 from xrp_styles import PAGE_CSS, section_header, divider_line
 
 # ── Brand colours ─────────────────────────────────────────────────────────────
@@ -150,8 +149,9 @@ PRODUCTS = {
 
 # ── Data loading ──────────────────────────────────────────────────────────────
 @st.cache_data(show_spinner="Loading panel data…")
-def load_data(path_or_file) -> pd.DataFrame:
-    df = pd.read_csv(path_or_file, low_memory=False)
+def load_data(filename, data_bytes) -> pd.DataFrame:
+    import io
+    df = pd.read_csv(io.BytesIO(data_bytes), low_memory=False)
 
     for col in ["Import Date", "Qualtrics Contact Signup date",
                 "XADE Xero User Signup Date", "XADE Xero ORG Signup date",
@@ -198,29 +198,29 @@ def load_data(path_or_file) -> pd.DataFrame:
 
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
+df_raw: Optional[pd.DataFrame] = None
+file_ref, filename = get_latest_csv()
+if file_ref is not None:
+    if hasattr(file_ref, "read"):
+        _bytes = file_ref.read()
+    else:
+        with open(file_ref, "rb") as _f:
+            _bytes = _f.read()
+    df_raw = load_data(filename, _bytes)
+
+if df_raw is None:
+    st.error(
+        "No data found. Check that:\n"
+        "- GITHUB_TOKEN and GITHUB_REPO are set in Streamlit secrets\n"
+        "- The repo contains a file starting with `xero_people_`\n"
+        "- The token has Contents: Read-only permission on that repo"
+    )
+    st.stop()
+
 with st.sidebar:
     st.markdown("## Xero Research Panel")
     st.markdown("---")
-
-    uploaded = st.file_uploader("Upload Rally CSV export", type=["csv"],
-                                label_visibility="collapsed")
-    df_raw: Optional[pd.DataFrame] = None
-
-    if uploaded:
-        df_raw = load_data(uploaded)
-    else:
-        hits = (
-            glob.glob(os.path.expanduser("~/Downloads/xero_people_*.csv")) +
-            glob.glob(os.path.expanduser("~/Desktop/xero_people_*.csv"))
-        )
-        if hits:
-            latest = max(hits, key=os.path.getmtime)
-            df_raw = load_data(latest)
-            st.caption(f"Auto-loaded: `{os.path.basename(latest)}`")
-
-    if df_raw is None:
-        st.info("Upload a Rally CSV export above to get started.")
-        st.stop()
+    st.caption(f"Data: `{filename}`")
 
     st.markdown("### Date range")
     all_dates = df_raw["_signup_date"].dropna()
