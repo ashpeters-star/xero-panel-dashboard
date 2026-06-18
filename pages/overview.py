@@ -645,6 +645,13 @@ fig_eng_prog.update_layout(
 st.plotly_chart(fig_eng_prog, use_container_width=True)
 
 st.markdown("##### Participation by segment")
+st.markdown("""
+<div style="background:#3D2B00; border-left:4px solid #F59E0B; border-radius:6px;
+            padding:10px 16px; margin-bottom:12px; font-size:13px; color:#FCD34D;">
+  ⚠️ <strong>Work in progress</strong> — segment-level engagement figures are estimated
+  and may not be accurate. Treat with caution.
+</div>
+""", unsafe_allow_html=True)
 
 df["_completions_yr"] = eng["interviews_yr"] + eng["surveys_yr"]
 df["_invites_yr"]     = eng["invites_yr"]
