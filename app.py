@@ -10,8 +10,11 @@ st.set_page_config(
 # ── Password gate ─────────────────────────────────────────────────────────────
 def check_password():
     # Users logged in via Streamlit sharing skip the password gate
-    if getattr(st.experimental_user, "email", None):
-        return True
+    try:
+        if st.experimental_user.email:
+            return True
+    except Exception:
+        pass
 
     if st.session_state.get("authenticated"):
         return True
