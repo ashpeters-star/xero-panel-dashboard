@@ -7,7 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from drive_loader import get_latest_csv, clear_cache
+from drive_loader import get_latest_csv
 from xrp_styles import PAGE_CSS, section_header, divider_line
 
 # ── Brand colours ─────────────────────────────────────────────────────────────
@@ -199,7 +199,8 @@ def load_data(filename, data_bytes) -> pd.DataFrame:
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 df_raw: Optional[pd.DataFrame] = None
-file_ref, filename = get_latest_csv()
+_rk = st.session_state.get("refresh_key", 0)
+file_ref, filename = get_latest_csv(refresh_key=_rk)
 if file_ref is not None:
     if hasattr(file_ref, "read"):
         _bytes = file_ref.read()
@@ -222,7 +223,7 @@ with st.sidebar:
     st.markdown("---")
     st.caption(f"Data: `{filename}`")
     if st.button("🔄 Refresh data", use_container_width=True):
-        clear_cache()
+        st.session_state["refresh_key"] = st.session_state.get("refresh_key", 0) + 1
         st.rerun()
 
     st.markdown("### Date range")

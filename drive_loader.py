@@ -17,14 +17,13 @@ import streamlit as st
 CSV_PREFIX = "xero_people_"
 
 
-@st.cache_data(ttl=300, show_spinner="Fetching latest export from GitHub…")
-def _fetch_from_github(token, repo, folder):
+@st.cache_data(ttl=3600, show_spinner="Fetching latest export from GitHub…")
+def _fetch_from_github(token, repo, folder, refresh_key=0):
     headers = {
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json",
     }
 
-    # List files in the repo folder
     folder_path = folder.strip("/")
     url = f"https://api.github.com/repos/{repo}/contents/{folder_path}"
     resp = requests.get(url, headers=headers, timeout=20)
@@ -45,18 +44,14 @@ def _fetch_from_github(token, repo, folder):
     return io.BytesIO(dl.content), latest["name"]
 
 
-def get_latest_csv():
-    """Return (file_ref, filename) for the latest xero_people CSV.
-
-    Tries GitHub first (if GITHUB_TOKEN + GITHUB_REPO are in Streamlit secrets),
-    then falls back to local files for development.
-    """
+def get_latest_csv(refresh_key=0):
+    """Return (file_ref, filename) for the latest xero_people CSV."""
     token = st.secrets.get("GITHUB_TOKEN")
     repo  = st.secrets.get("GITHUB_REPO")
     if token and repo:
         folder = st.secrets.get("GITHUB_FOLDER", "")
         try:
-            buf, name = _fetch_from_github(token, repo, folder)
+            buf, name = _fetch_from_github(token, repo, folder, refresh_key)
             if buf is not None:
                 return buf, name
             st.warning("No xero_people_*.csv files found in the GitHub repo.")
@@ -76,7 +71,6 @@ def get_latest_csv():
 
 
 def get_local_csv():
-    """Local-only fallback (used as uploader alternative on sidebar pages)."""
     hits = (
         glob.glob(os.path.expanduser("~/Downloads/xero_people_*.csv"))
         + glob.glob(os.path.expanduser("~/Desktop/xero_people_*.csv"))
@@ -85,8 +79,3 @@ def get_local_csv():
         path = max(hits, key=os.path.getmtime)
         return path, os.path.basename(path)
     return None, None
-
-
-def clear_cache():
-    """Force the next get_latest_csv() call to re-fetch from GitHub."""
-    _fetch_from_github.clear()
