@@ -301,19 +301,6 @@ target_gap  = target_pc - TARGET_SEG_GOAL
 
 st.html(PAGE_CSS)
 
-with st.expander("🔍 Debug: country field values"):
-    if "XADE User country" in df_raw.columns:
-        st.write("**XADE User Country** (top 15 values):")
-        st.write(df_raw["XADE User country"].fillna("(blank)").value_counts().head(15))
-    else:
-        st.write("XADE User Country column NOT found in CSV")
-    if "SR Org Location" in df_raw.columns:
-        st.write("**SR org location** (top 15 values):")
-        st.write(df_raw["SR Org Location"].fillna("(blank)").value_counts().head(15))
-    else:
-        st.write("SR org location column NOT found in CSV")
-    st.write("**_country** (derived, top 15 values):")
-    st.write(df_raw["_country"].value_counts().head(15))
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # HEADER + KPIs
