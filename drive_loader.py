@@ -19,12 +19,14 @@ CSV_PREFIX = "xero_people_"
 
 
 def _list_github_files(token, repo, folder):
-    """Always runs fresh — returns sorted list of CSV filenames in the repo."""
+    """Always runs fresh — returns CSV files sorted by upload date (newest first)."""
     headers = {
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json",
     }
     folder_path = folder.strip("/")
+
+    # List all CSV files in the repo
     url = f"https://api.github.com/repos/{repo}/contents/{folder_path}"
     resp = requests.get(url, headers=headers, timeout=20)
     resp.raise_for_status()
@@ -32,7 +34,23 @@ def _list_github_files(token, repo, folder):
         f for f in resp.json()
         if f["name"].startswith(CSV_PREFIX) and f["name"].endswith(".csv")
     ]
-    return sorted(files, key=lambda f: f["name"], reverse=True)
+
+    # Get the commit date each file was last added/modified
+    for f in files:
+        path = f"{folder_path}/{f['name']}".lstrip("/")
+        cr = requests.get(
+            f"https://api.github.com/repos/{repo}/commits",
+            headers=headers,
+            params={"path": path, "per_page": 1},
+            timeout=20,
+        )
+        if cr.ok and cr.json():
+            f["_commit_date"] = cr.json()[0]["commit"]["committer"]["date"]
+        else:
+            f["_commit_date"] = ""
+
+    # Sort by commit date — most recently uploaded file first
+    return sorted(files, key=lambda f: f["_commit_date"], reverse=True)
 
 
 @st.cache_data(show_spinner="Downloading latest export from GitHub…")
