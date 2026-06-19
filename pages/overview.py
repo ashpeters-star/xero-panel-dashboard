@@ -360,7 +360,7 @@ g5.metric("Days to FY27 end", f"{days_remaining:,}",
 fig_growth = go.Figure()
 fig_growth.add_trace(go.Bar(
     x=growth_df["Date"], y=growth_df["New"],
-    name="New sign-ups", marker_color=XERO_BLUE, opacity=0.5,
+    name="New sign-ups", marker_color=XERO_BLUE, opacity=0.6,
     yaxis="y2",
 ))
 fig_growth.add_trace(go.Scatter(
@@ -369,58 +369,21 @@ fig_growth.add_trace(go.Scatter(
     line=dict(color=XERO_GREEN, width=3),
     marker=dict(size=5),
 ))
-fig_growth.add_trace(go.Scatter(
-    x=[growth_df["Date"].min(), pd.Timestamp(FY27_END)],
-    y=[GROWTH_TARGET, GROWTH_TARGET],
-    name=f"Target {GROWTH_TARGET:,}",
-    mode="lines",
-    line=dict(color=XERO_RED, width=2, dash="dash"),
-))
 fig_growth.update_layout(
     plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
     font=dict(color="#FFFFFF"),
     height=300,
-    margin=dict(t=10, b=0, l=0, r=0),
+    margin=dict(t=10, b=0, l=0, r=60),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
                 font=dict(color="#FFFFFF")),
     xaxis=dict(title=None, tickfont=dict(color="#FFFFFF")),
     yaxis=dict(title="Cumulative members", showgrid=True, gridcolor="#2D3A55",
                tickfont=dict(color="#FFFFFF")),
-    yaxis2=dict(title="New sign-ups", overlaying="y", side="right", showgrid=False,
-                tickfont=dict(color="#FFFFFF")),
+    yaxis2=dict(title="New sign-ups / month", overlaying="y", side="right",
+                showgrid=False, tickfont=dict(color=XERO_BLUE)),
     bargap=0.2,
 )
 st.plotly_chart(fig_growth, use_container_width=True)
-
-fig_size_prog = go.Figure()
-fig_size_prog.add_trace(go.Bar(
-    x=[100], y=[""], orientation="h",
-    marker_color="#2D3A55", width=0.35, showlegend=False,
-))
-fig_size_prog.add_trace(go.Bar(
-    x=[size_pct], y=[""], orientation="h",
-    marker_color=size_color, width=0.35, showlegend=False,
-    text=f"  {current_total:,} of {GROWTH_TARGET:,}  ({size_pct:.1f}%)",
-    textposition="outside",
-    textfont=dict(size=13, color="#FFFFFF"),
-))
-fig_size_prog.add_vline(
-    x=100, line_color=XERO_RED, line_width=2, line_dash="dash",
-    annotation_text="7,500 target", annotation_position="top left",
-    annotation_font=dict(color=XERO_RED, size=12),
-)
-fig_size_prog.update_layout(
-    barmode="overlay",
-    font=dict(color="#FFFFFF"),
-    xaxis=dict(range=[0, 130], tickvals=[0, 25, 50, 75, 100],
-               ticktext=["0", "1,875", "3,750", "5,625", "7,500"],
-               showgrid=False, zeroline=False, tickfont=dict(color="#FFFFFF")),
-    yaxis=dict(showticklabels=False),
-    height=90,
-    margin=dict(t=25, b=5, l=0, r=120),
-    plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
-)
-st.plotly_chart(fig_size_prog, use_container_width=True)
 
 st.html(divider_line())
 
