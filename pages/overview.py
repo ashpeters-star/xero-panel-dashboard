@@ -198,8 +198,26 @@ def load_data(filename, data_bytes) -> pd.DataFrame:
 
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
+from drive_loader import _list_github_files
+
 df_raw: Optional[pd.DataFrame] = None
 file_ref, filename = get_latest_csv()
+
+# Temporary debug panel
+with st.expander("🔍 Debug info"):
+    _token  = st.secrets.get("GITHUB_TOKEN", "")
+    _repo   = st.secrets.get("GITHUB_REPO", "")
+    _folder = st.secrets.get("GITHUB_FOLDER", "")
+    st.write(f"**GITHUB_REPO secret:** `{_repo}`")
+    st.write(f"**File loaded:** `{filename}`")
+    if _token and _repo:
+        try:
+            _files = _list_github_files(_token, _repo, _folder)
+            st.write(f"**Files found in repo ({len(_files)}):**")
+            for _f in _files:
+                st.write(f"- `{_f['name']}`")
+        except Exception as _e:
+            st.error(f"GitHub listing error: {_e}")
 if file_ref is not None:
     if hasattr(file_ref, "read"):
         _bytes = file_ref.read()
