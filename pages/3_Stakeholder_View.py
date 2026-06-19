@@ -56,7 +56,7 @@ def load_data(filename, data_bytes) -> pd.DataFrame:
         "AE": "United Arab Emirates", "AU": "Australia",  "BW": "Botswana",
         "CA": "Canada",  "EG": "Egypt",   "ES": "Spain",  "FR": "France",
         "GB": "United Kingdom",  "GH": "Ghana",  "HK": "Hong Kong",
-        "ID": "Indonesia", "IE": "Ireland",  "IN": "India",  "JE": "Jersey",
+        "ID": "Indonesia", "IE": "Ireland",  "IN": "India",
         "JP": "Japan",  "KE": "Kenya",  "MT": "Malta",  "MU": "Mauritius",
         "MW": "Malawi", "MY": "Malaysia", "NG": "Nigeria", "NO": "Norway",
         "NZ": "New Zealand", "PH": "Philippines", "PK": "Pakistan",
