@@ -369,6 +369,13 @@ fig_growth.add_trace(go.Scatter(
     line=dict(color=XERO_GREEN, width=3),
     marker=dict(size=5),
 ))
+fig_growth.add_trace(go.Scatter(
+    x=[growth_df["Date"].min(), pd.Timestamp(FY27_END)],
+    y=[GROWTH_TARGET, GROWTH_TARGET],
+    name=f"Target {GROWTH_TARGET:,}",
+    mode="lines",
+    line=dict(color=XERO_RED, width=2, dash="dot"),
+))
 fig_growth.update_layout(
     plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
     font=dict(color="#FFFFFF"),
