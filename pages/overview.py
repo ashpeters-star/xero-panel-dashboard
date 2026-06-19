@@ -173,7 +173,11 @@ def load_data(filename, data_bytes) -> pd.DataFrame:
     )
 
     df["_segment"] = df.get("SR Customer Type", "").replace("", "Unknown").fillna("Unknown")
-    _xade = df["XADE User Country"].fillna("").astype(str).str.strip() if "XADE User Country" in df.columns else pd.Series("", index=df.index)
+    _ISO_NORM = {"AU": "Australia", "US": "United States", "UK": "United Kingdom",
+                 "NZ": "New Zealand", "SG": "Singapore", "CA": "Canada",
+                 "ZA": "South Africa", "IN": "India", "PH": "Philippines"}
+    _xade = (df["XADE User Country"].fillna("").astype(str).str.strip().replace(_ISO_NORM)
+             if "XADE User Country" in df.columns else pd.Series("", index=df.index))
     _sr   = df["SR org location"].fillna("").astype(str).str.strip()  if "SR org location"   in df.columns else pd.Series("", index=df.index)
     df["_country"] = _xade.where(_xade != "", _sr).replace("", "Unknown")
 
