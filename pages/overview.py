@@ -7,7 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from drive_loader import get_latest_csv
+from drive_loader import get_latest_csv, clear_cache
 from xrp_styles import PAGE_CSS, section_header, divider_line
 
 # ── Brand colours ─────────────────────────────────────────────────────────────
@@ -222,7 +222,7 @@ with st.sidebar:
     st.markdown("---")
     st.caption(f"Data: `{filename}`")
     if st.button("🔄 Refresh data", use_container_width=True):
-        st.cache_data.clear()
+        clear_cache()
         st.rerun()
 
     st.markdown("### Date range")

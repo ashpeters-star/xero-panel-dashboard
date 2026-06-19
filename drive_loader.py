@@ -85,3 +85,8 @@ def get_local_csv():
         path = max(hits, key=os.path.getmtime)
         return path, os.path.basename(path)
     return None, None
+
+
+def clear_cache():
+    """Force the next get_latest_csv() call to re-fetch from GitHub."""
+    _fetch_from_github.clear()

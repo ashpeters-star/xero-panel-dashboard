@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from drive_loader import get_latest_csv
+from drive_loader import get_latest_csv, clear_cache
 
 # ── Palette (matched to slide) ────────────────────────────────────────────────
 PAGE_BG      = "#1B2438"
@@ -147,7 +147,7 @@ st.markdown(f"""
 
 with st.sidebar:
     if st.button("🔄 Refresh data", use_container_width=True):
-        st.cache_data.clear()
+        clear_cache()
         st.rerun()
 
 # ══════════════════════════════════════════════════════════════════════════════
