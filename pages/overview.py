@@ -173,9 +173,18 @@ def load_data(filename, data_bytes) -> pd.DataFrame:
     )
 
     df["_segment"] = df.get("SR Customer Type", "").replace("", "Unknown").fillna("Unknown")
-    _ISO_NORM = {"AU": "Australia", "US": "United States", "UK": "United Kingdom",
-                 "NZ": "New Zealand", "SG": "Singapore", "CA": "Canada",
-                 "ZA": "South Africa", "IN": "India", "PH": "Philippines"}
+    _ISO_NORM = {
+        "AE": "United Arab Emirates", "AU": "Australia",  "BW": "Botswana",
+        "CA": "Canada",  "EG": "Egypt",   "ES": "Spain",  "FR": "France",
+        "GB": "United Kingdom",  "GH": "Ghana",  "HK": "Hong Kong",
+        "ID": "Indonesia", "IE": "Ireland",  "IN": "India",  "JE": "Jersey",
+        "JP": "Japan",  "KE": "Kenya",  "MT": "Malta",  "MU": "Mauritius",
+        "MW": "Malawi", "MY": "Malaysia", "NG": "Nigeria", "NO": "Norway",
+        "NZ": "New Zealand", "PH": "Philippines", "PK": "Pakistan",
+        "RW": "Rwanda",  "SG": "Singapore", "UA": "Ukraine",
+        "UK": "United Kingdom",  "US": "United States",
+        "ZA": "South Africa",  "ZM": "Zambia",
+    }
     _xade = (df["XADE User Country"].fillna("").astype(str).str.strip().replace(_ISO_NORM)
              if "XADE User Country" in df.columns else pd.Series("", index=df.index))
     _sr   = df["SR org location"].fillna("").astype(str).str.strip()  if "SR org location"   in df.columns else pd.Series("", index=df.index)
