@@ -361,7 +361,9 @@ fig_growth = go.Figure()
 fig_growth.add_trace(go.Bar(
     x=growth_df["Date"], y=growth_df["New"],
     name="New sign-ups", marker_color=XERO_BLUE, opacity=0.6,
-    yaxis="y2",
+    text=growth_df["New"],
+    textposition="outside",
+    textfont=dict(size=10, color="#FFFFFF"),
 ))
 fig_growth.add_trace(go.Scatter(
     x=growth_df["Date"], y=growth_df["Cumulative"],
@@ -384,10 +386,8 @@ fig_growth.update_layout(
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
                 font=dict(color="#FFFFFF")),
     xaxis=dict(title=None, tickfont=dict(color="#FFFFFF")),
-    yaxis=dict(title="Cumulative members", showgrid=True, gridcolor="#2D3A55",
+    yaxis=dict(title="Members", showgrid=True, gridcolor="#2D3A55",
                tickfont=dict(color="#FFFFFF")),
-    yaxis2=dict(title="New sign-ups / month", overlaying="y", side="right",
-                showgrid=False, tickfont=dict(color=XERO_BLUE)),
     bargap=0.2,
 )
 st.plotly_chart(fig_growth, use_container_width=True)
