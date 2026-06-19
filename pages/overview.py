@@ -173,7 +173,9 @@ def load_data(filename, data_bytes) -> pd.DataFrame:
     )
 
     df["_segment"] = df.get("SR Customer Type", "").replace("", "Unknown").fillna("Unknown")
-    df["_country"]  = df.get("SR User Country", "").replace("", "Unknown").fillna("Unknown")
+    _xade = df["XADE User Country"].fillna("").astype(str).str.strip() if "XADE User Country" in df.columns else pd.Series("", index=df.index)
+    _sr   = df["SR org location"].fillna("").astype(str).str.strip()  if "SR org location"   in df.columns else pd.Series("", index=df.index)
+    df["_country"] = _xade.where(_xade != "", _sr).replace("", "Unknown")
 
     df["_employees"]  = df.get("SR # of Employees", pd.NA).apply(safe_int)
     df["_partners"]   = df.get("SR # of partners",  pd.NA).apply(safe_int)

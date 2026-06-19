@@ -52,7 +52,10 @@ def load_data(filename, data_bytes) -> pd.DataFrame:
     buf = io.BytesIO(data_bytes) if isinstance(data_bytes, bytes) else data_bytes
     df = pd.read_csv(buf, low_memory=False)
     df["_ctype"]  = df.get("SR Customer Type", "").replace("", "Unknown").fillna("Unknown")
-    df["_region"] = df.get("SR User Country", "").replace("", pd.NA).map(COUNTRY_MAP)
+    _xade = df["XADE User Country"].fillna("").astype(str).str.strip() if "XADE User Country" in df.columns else pd.Series("", index=df.index)
+    _sr   = df["SR org location"].fillna("").astype(str).str.strip()  if "SR org location"   in df.columns else pd.Series("", index=df.index)
+    _country = _xade.where(_xade != "", _sr).replace("", pd.NA)
+    df["_region"] = _country.map(COUNTRY_MAP)
     df["_ab"]     = df["_ctype"].isin(AB_TYPES)
     df["_sb"]     = df["_ctype"].isin(SB_TYPES)
     df["_both"]   = df["_ctype"].isin(BOTH_TYPES)

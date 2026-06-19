@@ -85,8 +85,10 @@ def load_data(filename, data_bytes) -> pd.DataFrame:
         axis=1,
     )
     df["_agg_seg"]  = df["_target_seg"].map(AGG_SEG_MAP).fillna("Not classified")
-    df["_country"]  = df.get("SR User Country", "").replace("", pd.NA).fillna("Unknown")
-    df["_region"]   = df["_country"].map(COUNTRY_MAP)   # AU / US / UK / NaN
+    _xade = df["XADE User Country"].fillna("").astype(str).str.strip() if "XADE User Country" in df.columns else pd.Series("", index=df.index)
+    _sr   = df["SR org location"].fillna("").astype(str).str.strip()  if "SR org location"   in df.columns else pd.Series("", index=df.index)
+    df["_country"] = _xade.where(_xade != "", _sr).replace("", "Unknown")
+    df["_region"]  = df["_country"].replace("Unknown", pd.NA).map(COUNTRY_MAP)
     return df
 
 
