@@ -185,9 +185,9 @@ def load_data(filename, data_bytes) -> pd.DataFrame:
         "UK": "United Kingdom",  "US": "United States",
         "ZA": "South Africa",  "ZM": "Zambia",
     }
-    _xade = (df["XADE User Country"].fillna("").astype(str).str.strip().replace(_ISO_NORM)
-             if "XADE User Country" in df.columns else pd.Series("", index=df.index))
-    _sr   = df["SR org location"].fillna("").astype(str).str.strip()  if "SR org location"   in df.columns else pd.Series("", index=df.index)
+    _xade = (df["XADE User country"].fillna("").astype(str).str.strip().replace(_ISO_NORM)
+             if "XADE User country" in df.columns else pd.Series("", index=df.index))
+    _sr   = df["SR Org Location"].fillna("").astype(str).str.strip()  if "SR Org Location"   in df.columns else pd.Series("", index=df.index)
     df["_country"] = _xade.where(_xade != "", _sr).replace("", "Unknown")
 
     df["_employees"]  = df.get("SR # of Employees", pd.NA).apply(safe_int)
@@ -302,14 +302,14 @@ target_gap  = target_pc - TARGET_SEG_GOAL
 st.html(PAGE_CSS)
 
 with st.expander("🔍 Debug: country field values"):
-    if "XADE User Country" in df_raw.columns:
+    if "XADE User country" in df_raw.columns:
         st.write("**XADE User Country** (top 15 values):")
-        st.write(df_raw["XADE User Country"].fillna("(blank)").value_counts().head(15))
+        st.write(df_raw["XADE User country"].fillna("(blank)").value_counts().head(15))
     else:
         st.write("XADE User Country column NOT found in CSV")
-    if "SR org location" in df_raw.columns:
+    if "SR Org Location" in df_raw.columns:
         st.write("**SR org location** (top 15 values):")
-        st.write(df_raw["SR org location"].fillna("(blank)").value_counts().head(15))
+        st.write(df_raw["SR Org Location"].fillna("(blank)").value_counts().head(15))
     else:
         st.write("SR org location column NOT found in CSV")
     st.write("**_country** (derived, top 15 values):")

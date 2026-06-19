@@ -64,9 +64,9 @@ def load_data(filename, data_bytes) -> pd.DataFrame:
         "UK": "United Kingdom",  "US": "United States",
         "ZA": "South Africa",  "ZM": "Zambia",
     }
-    _xade = (df["XADE User Country"].fillna("").astype(str).str.strip().replace(_ISO_NORM)
-             if "XADE User Country" in df.columns else pd.Series("", index=df.index))
-    _sr   = df["SR org location"].fillna("").astype(str).str.strip()  if "SR org location"   in df.columns else pd.Series("", index=df.index)
+    _xade = (df["XADE User country"].fillna("").astype(str).str.strip().replace(_ISO_NORM)
+             if "XADE User country" in df.columns else pd.Series("", index=df.index))
+    _sr   = df["SR Org Location"].fillna("").astype(str).str.strip()  if "SR Org Location"   in df.columns else pd.Series("", index=df.index)
     _country = _xade.where(_xade != "", _sr).replace("", pd.NA)
     df["_region"] = _country.map(COUNTRY_MAP)
     df["_ab"]     = df["_ctype"].isin(AB_TYPES)
