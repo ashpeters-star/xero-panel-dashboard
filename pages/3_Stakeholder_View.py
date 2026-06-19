@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from drive_loader import get_latest_csv
+from drive_loader import get_latest_csv, _download_file
 
 # ── Palette (matched to slide) ────────────────────────────────────────────────
 PAGE_BG      = "#1B2438"
@@ -59,8 +59,7 @@ def load_data(filename, data_bytes) -> pd.DataFrame:
     return df
 
 
-_rk = st.session_state.get("refresh_key", 0)
-_file_ref, _filename = get_latest_csv(refresh_key=_rk)
+_file_ref, _filename = get_latest_csv()
 if _file_ref is None:
     st.error("No data found. Add GITHUB_TOKEN and GITHUB_REPO to Streamlit secrets.")
     st.stop()
@@ -148,7 +147,7 @@ st.markdown(f"""
 
 with st.sidebar:
     if st.button("🔄 Refresh data", use_container_width=True):
-        st.session_state["refresh_key"] = st.session_state.get("refresh_key", 0) + 1
+        _download_file.clear()
         st.rerun()
 
 # ══════════════════════════════════════════════════════════════════════════════

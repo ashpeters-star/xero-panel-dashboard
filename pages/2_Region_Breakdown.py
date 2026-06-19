@@ -3,7 +3,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from drive_loader import get_latest_csv
+from drive_loader import get_latest_csv, _download_file
 from xrp_styles import PAGE_CSS, section_header, divider_line
 
 # ── Colours ───────────────────────────────────────────────────────────────────
@@ -92,8 +92,7 @@ def load_data(filename, data_bytes) -> pd.DataFrame:
 
 # ── Load CSV ──────────────────────────────────────────────────────────────────
 df_raw = None
-_rk = st.session_state.get("refresh_key", 0)
-file_ref, filename = get_latest_csv(refresh_key=_rk)
+file_ref, filename = get_latest_csv()
 if file_ref is not None:
     if hasattr(file_ref, "read"):
         _bytes = file_ref.read()
@@ -115,7 +114,7 @@ with st.sidebar:
     st.markdown("## Region Breakdown")
     st.markdown("---")
     if st.button("🔄 Refresh data", use_container_width=True):
-        st.session_state["refresh_key"] = st.session_state.get("refresh_key", 0) + 1
+        _download_file.clear()
         st.rerun()
     st.caption(f"Data: `{filename}`")
     st.markdown("### Filters")

@@ -1,10 +1,11 @@
 """
 CSV loader for the XRP dashboard.
 
-On Streamlit Cloud: fetches the latest xero_people_*.csv from a private
-GitHub repo using a personal access token stored in Streamlit secrets.
+File listing: always fetched fresh from GitHub (tiny JSON call).
+File download: cached by filename — only re-downloads when a new file appears.
 
-Locally: auto-detects the latest xero_people_*.csv in ~/Downloads or ~/Desktop.
+This means the dashboard always detects new files on every page load,
+with no manual refresh needed.
 """
 
 import glob
@@ -17,31 +18,33 @@ import streamlit as st
 CSV_PREFIX = "xero_people_"
 
 
-@st.cache_data(ttl=3600, show_spinner="Fetching latest export from GitHub…")
-def _fetch_from_github(token, repo, folder, refresh_key=0):
+def _list_github_files(token, repo, folder):
+    """Always runs fresh — returns sorted list of CSV filenames in the repo."""
     headers = {
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json",
     }
-
     folder_path = folder.strip("/")
     url = f"https://api.github.com/repos/{repo}/contents/{folder_path}"
     resp = requests.get(url, headers=headers, timeout=20)
     resp.raise_for_status()
-
     files = [
         f for f in resp.json()
         if f["name"].startswith(CSV_PREFIX) and f["name"].endswith(".csv")
     ]
-    if not files:
-        return None, None
+    return sorted(files, key=lambda f: f["name"], reverse=True)
 
-    # Filenames are timestamped so alphabetical sort = chronological
-    latest = sorted(files, key=lambda f: f["name"], reverse=True)[0]
 
-    dl = requests.get(latest["download_url"], headers=headers, timeout=60)
+@st.cache_data(show_spinner="Downloading latest export from GitHub…")
+def _download_file(token, download_url, filename):
+    """Cached by filename — only re-downloads when a new file is uploaded."""
+    headers = {
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github.v3+json",
+    }
+    dl = requests.get(download_url, headers=headers, timeout=60)
     dl.raise_for_status()
-    return io.BytesIO(dl.content), latest["name"]
+    return dl.content
 
 
 def get_latest_csv(refresh_key=0):
@@ -51,10 +54,13 @@ def get_latest_csv(refresh_key=0):
     if token and repo:
         folder = st.secrets.get("GITHUB_FOLDER", "")
         try:
-            buf, name = _fetch_from_github(token, repo, folder, refresh_key)
-            if buf is not None:
-                return buf, name
-            st.warning("No xero_people_*.csv files found in the GitHub repo.")
+            files = _list_github_files(token, repo, folder)
+            if not files:
+                st.warning("No xero_people_*.csv files found in the GitHub repo.")
+            else:
+                latest  = files[0]
+                content = _download_file(token, latest["download_url"], latest["name"])
+                return io.BytesIO(content), latest["name"]
         except Exception as e:
             st.warning(f"GitHub fetch failed ({e}); falling back to local files.")
 
