@@ -256,10 +256,11 @@ with st.sidebar:
 
 # ── Apply filters ─────────────────────────────────────────────────────────────
 df = df_raw.copy()
-df = df[
-    (df["_signup_date"].dt.date >= start_date) &
-    (df["_signup_date"].dt.date <= end_date)
-]
+if df["_signup_date"].notna().any():
+    df = df[
+        (df["_signup_date"].dt.date >= start_date) &
+        (df["_signup_date"].dt.date <= end_date)
+    ]
 if selected_countries:
     df = df[df["_country"].isin(selected_countries)]
 
