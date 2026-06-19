@@ -145,6 +145,11 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 
+with st.sidebar:
+    if st.button("🔄 Refresh data", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
+
 # ══════════════════════════════════════════════════════════════════════════════
 # HEADER
 # ══════════════════════════════════════════════════════════════════════════════

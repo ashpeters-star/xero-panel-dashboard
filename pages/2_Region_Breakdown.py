@@ -113,6 +113,9 @@ if df_raw is None:
 with st.sidebar:
     st.markdown("## Region Breakdown")
     st.markdown("---")
+    if st.button("🔄 Refresh data", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
     st.caption(f"Data: `{filename}`")
     st.markdown("### Filters")
     show_unclassified = st.checkbox("Include 'Not classified'", value=False)

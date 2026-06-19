@@ -221,6 +221,9 @@ with st.sidebar:
     st.markdown("## Xero Research Panel")
     st.markdown("---")
     st.caption(f"Data: `{filename}`")
+    if st.button("🔄 Refresh data", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
 
     st.markdown("### Date range")
     all_dates = df_raw["_signup_date"].dropna()
