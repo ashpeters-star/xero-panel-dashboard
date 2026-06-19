@@ -387,7 +387,7 @@ fig_growth.update_layout(
                 font=dict(color="#FFFFFF")),
     xaxis=dict(title=None, tickfont=dict(color="#FFFFFF")),
     yaxis=dict(title="Members", showgrid=True, gridcolor="#2D3A55",
-               tickfont=dict(color="#FFFFFF")),
+               tickfont=dict(color="#FFFFFF"), range=[0, GROWTH_TARGET]),
     bargap=0.2,
 )
 st.plotly_chart(fig_growth, use_container_width=True)
