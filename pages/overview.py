@@ -224,10 +224,16 @@ with st.sidebar:
 
     st.markdown("### Date range")
     all_dates = df_raw["_signup_date"].dropna()
-    d_min = all_dates.min().date()
-    d_max = all_dates.max().date()
-    start_date = st.date_input("From", value=d_min, min_value=d_min, max_value=d_max)
-    end_date   = st.date_input("To",   value=d_max, min_value=d_min, max_value=d_max)
+    if all_dates.empty:
+        st.warning("No signup dates found in this CSV — date filter disabled.")
+        start_date = date(2020, 1, 1)
+        end_date   = date.today()
+        d_min, d_max = start_date, end_date
+    else:
+        d_min = all_dates.min().date()
+        d_max = all_dates.max().date()
+        start_date = st.date_input("From", value=d_min, min_value=d_min, max_value=d_max)
+        end_date   = st.date_input("To",   value=d_max, min_value=d_min, max_value=d_max)
 
     st.markdown("### Target segments")
     st.caption("Small business · Medium business · Small practice · Midsize practice")
