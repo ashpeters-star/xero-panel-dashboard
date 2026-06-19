@@ -243,11 +243,7 @@ with st.sidebar:
     all_countries = sorted(df_raw["_country"].unique())
     selected_countries = st.multiselect("Filter by country (blank = all)", options=all_countries, default=[])
 
-    st.markdown("### Engagement completions")
-    st.caption("Total completions from reports (surveys + screeners + unmod + interviews)")
-    manual_completions = st.number_input(
-        "Total completions (all time)", min_value=0, value=1578, step=1,
-    )
+    manual_completions = int(st.secrets.get("ENGAGEMENT_COMPLETIONS", 1578))
 
     st.markdown("### Granularity")
     freq_label = st.radio("Sign-up chart", ["Weekly", "Monthly"], index=1, horizontal=True)
